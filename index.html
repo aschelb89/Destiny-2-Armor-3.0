@@ -49,38 +49,38 @@
     <tbody>
       <tr>
         <td><strong>Paragon</strong></td>
-        <td>Super (Intellect)</td>
-        <td>Melee (Strength)</td>
+        <td>Super </td>
+        <td>Melee </td>
         <td>Boosts Super and Melee regeneration stats, ideal for builds centered on powerful Super abilities and close-range combat.</td>
       </tr>
       <tr>
         <td><strong>Gunner</strong></td>
-        <td>Weapons (Discipline)</td>
-        <td>Grenade (Discipline)</td>
+        <td>Weapons </td>
+        <td>Grenade </td>
         <td>Focuses on weapon handling and grenade regeneration. Perfect for aggressive weapon and grenade spammers.</td>
       </tr>
       <tr>
         <td><strong>Brawler</strong></td>
-        <td>Melee (Strength)</td>
-        <td>Health (Resilience)</td>
+        <td>Melee </td>
+        <td>Health </td>
         <td>Strengthens Melee attacks and overall health. Great for tanky melee-focused builds.</td>
       </tr>
       <tr>
         <td><strong>Bulwark</strong></td>
-        <td>Health (Resilience)</td>
-        <td>Class Ability (Recovery)</td>
+        <td>Health </td>
+        <td>Class Ability </td>
         <td>Increases durability and class ability recharge, suited for defensive and support roles.</td>
       </tr>
       <tr>
         <td><strong>Grenadier</strong></td>
-        <td>Grenade (Discipline)</td>
-        <td>Super (Intellect)</td>
+        <td>Grenade </td>
+        <td>Super </td>
         <td>Prioritizes grenade and Super energy, enabling frequent use of both grenades and Supers.</td>
       </tr>
       <tr>
         <td><strong>Specialist</strong></td>
-        <td>Class Ability (Recovery)</td>
-        <td>Weapons (Discipline)</td>
+        <td>Class Ability</td>
+        <td>Weapons</td>
         <td>Enhances class ability recharge and weapon handling. Ideal for builds that rely heavily on class skills and weapons.</td>
       </tr>
     </tbody>
@@ -116,7 +116,7 @@
   const TIERS = [1,2,3,4,5];
   const ARCHETYPES = ['Paragon','Gunner','Brawler','Bulwark','Grenadier','Specialist'];
   const CLASSES = ['Hunter','Titan','Warlock'];
-  const STATS = ['Mobility', 'Resilience', 'Recovery', 'Discipline', 'Intellect', 'Strength'];
+  const STATS = ['Weapon', 'Health', 'Class', 'Grenade', 'Super', 'Melee'];
 
   // Create stat inputs for calculator
   const statInputsContainer = document.getElementById('statInputs');
@@ -208,23 +208,23 @@
     STATS.forEach(s => stats[s] = 0);
     buildSlots.forEach(({tier, archetype}) => {
       if (archetype === 'Paragon') {
-        stats.Intellect += tier * 6;
-        stats.Strength += tier * 5;
+        stats.Super += tier * 6;
+        stats.Melee += tier * 5;
       } else if (archetype === 'Gunner') {
-        stats.Discipline += tier * 6;
-        stats.Mobility += tier * 4;
+        stats.Grenade += tier * 6;
+        stats.Weapon += tier * 4;
       } else if (archetype === 'Brawler') {
-        stats.Strength += tier * 7;
-        stats.Resilience += tier * 5;
+        stats.Melee += tier * 7;
+        stats.Health += tier * 5;
       } else if (archetype === 'Bulwark') {
-        stats.Resilience += tier * 7;
-        stats.Recovery += tier * 5;
+        stats.Health += tier * 7;
+        stats.Class += tier * 5;
       } else if (archetype === 'Grenadier') {
-        stats.Discipline += tier * 7;
-        stats.Intellect += tier * 5;
+        stats.Grenade += tier * 7;
+        stats.Super += tier * 5;
       } else if (archetype === 'Specialist') {
-        stats.Recovery += tier * 7;
-        stats.Mobility += tier * 5;
+        stats.Class += tier * 7;
+        stats.Weapon += tier * 5;
       }
     });
     return stats;
