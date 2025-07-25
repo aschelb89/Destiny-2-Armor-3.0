@@ -203,32 +203,57 @@
   }
 
   // Calculate stats from build - same mock logic as React version
-  function calculateStatsFromBuild() {
-    const stats = {};
-    STATS.forEach(s => stats[s] = 0);
-    buildSlots.forEach(({tier, archetype}) => {
-      if (archetype === 'Paragon') {
-        stats.Super += tier * 6;
-        stats.Melee += tier * 5;
-      } else if (archetype === 'Gunner') {
-        stats.Grenade += tier * 6;
-        stats.Weapon += tier * 4;
-      } else if (archetype === 'Brawler') {
-        stats.Melee += tier * 7;
-        stats.Health += tier * 5;
-      } else if (archetype === 'Bulwark') {
-        stats.Health += tier * 7;
-        stats.Class += tier * 5;
-      } else if (archetype === 'Grenadier') {
-        stats.Grenade += tier * 7;
-        stats.Super += tier * 5;
-      } else if (archetype === 'Specialist') {
-        stats.Class += tier * 7;
-        stats.Weapon += tier * 5;
-      }
-    });
-    return stats;
-  }
+function calculateStatsFromBuild() {
+  const stats = {
+    Weapons: 0,
+    Health: 0,
+    Class: 0,
+    Grenade: 0,
+    Super: 0,
+    Melee: 0,
+  };
+
+  const tierValues = {
+    1: { primary: 16, secondary: 12 },
+    2: { primary: 20, secondary: 15 },
+    3: { primary: 24, secondary: 18 },
+    4: { primary: 30, secondary: 25 },
+    5: { primary: 32, secondary: 27 } // Slightly higher than T4 based on "80+" estimate
+  };
+
+  buildSlots.forEach(({ tier, archetype }) => {
+    const { primary, secondary } = tierValues[tier];
+
+    switch (archetype) {
+      case 'Paragon':
+        stats.Super += primary;
+        stats.Melee += secondary;
+        break;
+      case 'Gunner':
+        stats.Weapons += primary;
+        stats.Grenade += secondary;
+        break;
+      case 'Brawler':
+        stats.Melee += primary;
+        stats.Health += secondary;
+        break;
+      case 'Bulwark':
+        stats.Health += primary;
+        stats.Class += secondary;
+        break;
+      case 'Grenadier':
+        stats.Grenade += primary;
+        stats.Super += secondary;
+        break;
+      case 'Specialist':
+        stats.Class += primary;
+        stats.Weapons += secondary;
+        break;
+    }
+  });
+
+  return stats;
+}
 
   function updateTotalStats() {
     const totals = calculateStatsFromBuild();
