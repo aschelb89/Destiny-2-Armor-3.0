@@ -55,9 +55,9 @@
       </tr>
       <tr>
         <td><strong>Gunner</strong></td>
-        <td>Weapons </td>
+        <td>Weapon </td>
         <td>Grenade </td>
-        <td>Focuses on weapon handling and grenade regeneration. Perfect for aggressive weapon and grenade spammers.</td>
+        <td>Focuses on Weapon handling and grenade regeneration. Perfect for aggressive Weapon and grenade spammers.</td>
       </tr>
       <tr>
         <td><strong>Brawler</strong></td>
@@ -80,8 +80,8 @@
       <tr>
         <td><strong>Specialist</strong></td>
         <td>Class Ability</td>
-        <td>Weapons</td>
-        <td>Enhances class ability recharge and weapon handling. Ideal for builds that rely heavily on class skills and weapons.</td>
+        <td>Weapon</td>
+        <td>Enhances class ability recharge and Weapon handling. Ideal for builds that rely heavily on class skills and Weapon.</td>
       </tr>
     </tbody>
   </table>
@@ -205,7 +205,7 @@
   // Calculate stats from build - same mock logic as React version
 function calculateStatsFromBuild() {
   const stats = {
-    Weapons: 0,
+    Weapon: 0,
     Health: 0,
     Class: 0,
     Grenade: 0,
@@ -230,7 +230,7 @@ function calculateStatsFromBuild() {
         stats.Melee += secondary;
         break;
       case 'Gunner':
-        stats.Weapons += primary;
+        stats.Weapon += primary;
         stats.Grenade += secondary;
         break;
       case 'Brawler':
@@ -247,7 +247,7 @@ function calculateStatsFromBuild() {
         break;
       case 'Specialist':
         stats.Class += primary;
-        stats.Weapons += secondary;
+        stats.Weapon += secondary;
         break;
     }
   });
