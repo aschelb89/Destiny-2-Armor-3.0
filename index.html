@@ -94,11 +94,38 @@
   </p>
 </div>
 
-<div class="section" id="statCalcSection">
-  <h2>Stat Calculator (Desired Stats Input)</h2>
-  <div class="flex-row" id="statInputs"></div>
-  <button id="calcSuggested">Calculate Suggested Build</button>
-  <p id="suggestedBuildOutput"></p>
+<div class="section" id="options-and-suggestions-section">
+  <h2>Build Options & Suggestions</h2>
+
+  <label for="build-class">Class:</label>
+  <select id="build-class">
+    <option value="Titan">Titan</option>
+    <option value="Hunter" selected>Hunter</option>
+    <option value="Warlock">Warlock</option>
+  </select>
+
+  <label for="tertiary-stat" style="margin-left: 20px;">Tertiary Stat:</label>
+  <select id="tertiary-stat">
+    <option value="Weapons">Weapons</option>
+    <option value="Class">Class</option>
+    <option value="Super">Super</option>
+    <option value="Melee">Melee</option>
+    <option value="Grenade">Grenade</option>
+    <option value="Health">Health</option>
+  </select>
+
+  <br /><br />
+  <label>
+    <input type="checkbox" id="masterwork-toggle" />
+    Include Masterwork bonus (+5 to 3 non-priority stats)
+  </label>
+
+  <br /><br />
+  <button onclick="runBuildSuggestionEngine()">Generate Build Suggestions</button>
+
+  <div id="build-suggestions-output" style="margin-top:20px;">
+    <!-- Suggestions will be displayed here -->
+  </div>
 </div>
 
 <div class="section" id="tertiaryModeSection">
