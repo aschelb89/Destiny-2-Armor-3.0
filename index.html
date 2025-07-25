@@ -6,7 +6,7 @@
 <title>Destiny 2 Armor 3.0 Calculator</title>
 <style>
   body { font-family: Arial, sans-serif; background: #d0e7f9; margin: 20px; }
-  .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 0 8px rgba(0,0,0,0.1);}
+  .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
   label { display: block; margin-top: 10px; }
   input[type=number], select { padding: 6px; font-size: 16px; width: 100%; max-width: 200px; }
   button { margin-top: 15px; padding: 10px 15px; font-size: 16px; cursor: pointer; }
@@ -25,6 +25,12 @@
   th {
     background: #e0f0ff;
   }
+  .masterwork-toggle {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 </style>
 </head>
 <body>
@@ -34,7 +40,6 @@
   <p>Calculate your optimal armor builds by selecting your class, desired stats, and customizing armor tiers and archetypes.</p>
 </div>
 
-<!-- New Armor Archetype Breakdown Section -->
 <div class="section">
   <h2>🛡️ Armor Archetype Breakdown</h2>
   <table>
@@ -49,52 +54,56 @@
     <tbody>
       <tr>
         <td><strong>Paragon</strong></td>
-        <td>Super </td>
-        <td>Melee </td>
+        <td>Super</td>
+        <td>Melee</td>
         <td>Boosts Super and Melee regeneration stats, ideal for builds centered on powerful Super abilities and close-range combat.</td>
       </tr>
       <tr>
         <td><strong>Gunner</strong></td>
-        <td>Weapon </td>
-        <td>Grenade </td>
-        <td>Focuses on Weapon handling and grenade regeneration. Perfect for aggressive Weapon and grenade spammers.</td>
+        <td>Weapons</td>
+        <td>Grenade</td>
+        <td>Focuses on weapon handling and grenade regeneration. Perfect for aggressive weapon and grenade spammers.</td>
       </tr>
       <tr>
         <td><strong>Brawler</strong></td>
-        <td>Melee </td>
-        <td>Health </td>
+        <td>Melee</td>
+        <td>Health</td>
         <td>Strengthens Melee attacks and overall health. Great for tanky melee-focused builds.</td>
       </tr>
       <tr>
         <td><strong>Bulwark</strong></td>
-        <td>Health </td>
-        <td>Class Ability </td>
+        <td>Health</td>
+        <td>Class Ability</td>
         <td>Increases durability and class ability recharge, suited for defensive and support roles.</td>
       </tr>
       <tr>
         <td><strong>Grenadier</strong></td>
-        <td>Grenade </td>
-        <td>Super </td>
+        <td>Grenade</td>
+        <td>Super</td>
         <td>Prioritizes grenade and Super energy, enabling frequent use of both grenades and Supers.</td>
       </tr>
       <tr>
         <td><strong>Specialist</strong></td>
         <td>Class Ability</td>
-        <td>Weapon</td>
-        <td>Enhances class ability recharge and Weapon handling. Ideal for builds that rely heavily on class skills and Weapon.</td>
+        <td>Weapons</td>
+        <td>Enhances class ability recharge and weapon handling. Ideal for builds that rely heavily on class skills and weapons.</td>
       </tr>
     </tbody>
   </table>
   <p style="margin-top: 10px; font-style: italic;">
-    ⚠️ <em>Note:</em> The actual stat gains vary by armor tier and Masterwork bonuses, so combining archetypes strategically can help you hit your desired stats efficiently.
+    ⚠️ <em>Note:</em> Stat gains vary by armor tier and Masterwork bonuses. Combining archetypes strategically helps reach desired stats efficiently.
   </p>
 </div>
 
 <div class="section" id="statCalcSection">
-  <h2>Stat Calculator (Desired Stats Input) Coming Soon!!!!</h2>
+  <h2>Stat Calculator (Desired Stats Input) COMING SOON!</h2>
   <div class="flex-row" id="statInputs"></div>
+  <div class="masterwork-toggle">
+    <label for="masterworkToggle">Include Masterwork Bonuses (+5 to non-primary/secondary stats per piece)</label>
+    <input type="checkbox" id="masterworkToggle" checked />
+  </div>
   <button id="calcSuggested">Calculate Suggested Build</button>
-  <p id="suggestedBuildOutput"></p>
+  <p id="suggestedBuildOutput" style="margin-top:10px; font-weight:bold;"></p>
 </div>
 
 <div class="section" id="customBuilderSection">
@@ -113,10 +122,29 @@
 </div>
 
 <script>
-  const TIERS = [1,2,3,4,5];
-  const ARCHETYPES = ['Paragon','Gunner','Brawler','Bulwark','Grenadier','Specialist'];
-  const CLASSES = ['Hunter','Titan','Warlock'];
+  const TIERS = [1, 2, 3, 4, 5];
+  const ARCHETYPES = ['Paragon', 'Gunner', 'Brawler', 'Bulwark', 'Grenadier', 'Specialist'];
+  const CLASSES = ['Hunter', 'Titan', 'Warlock'];
   const STATS = ['Weapon', 'Health', 'Class', 'Grenade', 'Super', 'Melee'];
+
+  // Tier stat distribution based on guide averages (primary, secondary, tertiary pools)
+  const TIER_STATS = {
+    1: { primary: 16, secondary: 12, tertiary: 6 }, // avg tertiary ~5-8
+    2: { primary: 20, secondary: 15, tertiary: 10 },
+    3: { primary: 24, secondary: 18, tertiary: 13 },
+    4: { primary: 30, secondary: 25, tertiary: 17 },
+    5: { primary: 32, secondary: 26, tertiary: 20 }
+  };
+
+  // Map archetype to primary and secondary stats for calculation
+  const ARCHETYPE_STATS = {
+    'Paragon': { primary: 'Super', secondary: 'Melee' },
+    'Gunner': { primary: 'Weapon', secondary: 'Grenade' },
+    'Brawler': { primary: 'Melee', secondary: 'Health' },
+    'Bulwark': { primary: 'Health', secondary: 'Class' },
+    'Grenadier': { primary: 'Grenade', secondary: 'Super' },
+    'Specialist': { primary: 'Class', secondary: 'Weapon' }
+  };
 
   // Create stat inputs for calculator
   const statInputsContainer = document.getElementById('statInputs');
@@ -133,17 +161,10 @@
   STATS.forEach(stat => {
     document.getElementById(`stat_${stat}`).addEventListener('input', e => {
       let val = parseInt(e.target.value);
-      if(isNaN(val) || val < 0) val = 0;
-      else if(val > 200) val = 200;
+      if (isNaN(val) || val < 0) val = 0;
+      else if (val > 200) val = 200;
       desiredStats[stat] = val;
     });
-  });
-
-  // Calculate suggested build (dummy logic for demo)
-  document.getElementById('calcSuggested').addEventListener('click', () => {
-    // TODO: Replace with real matching algorithm
-    document.getElementById('suggestedBuildOutput').textContent =
-      'Suggested build: Please come back as this continually gets updated!!!';
   });
 
   // Build slots for custom builder
@@ -181,8 +202,7 @@
     });
     div.appendChild(archetypeSelect);
 
-    // Initialize build slot object
-    buildSlots[i] = {tier: 5, archetype: ARCHETYPES[0]};
+    buildSlots[i] = { tier: 5, archetype: ARCHETYPES[0] };
     tierSelect.value = 5;
     archetypeSelect.value = ARCHETYPES[0];
 
@@ -198,62 +218,49 @@
     return div;
   }
 
-  for(let i=0; i<5; i++) {
+  for (let i = 0; i < 5; i++) {
     armorSlotsDiv.appendChild(createBuildSlot(i));
   }
 
-  // Calculate stats from build - same mock logic as React version
-function calculateStatsFromBuild() {
-  const stats = {
-    Weapon: 0,
-    Health: 0,
-    Class: 0,
-    Grenade: 0,
-    Super: 0,
-    Melee: 0,
-  };
+  // Masterwork toggle
+  const masterworkToggle = document.getElementById('masterworkToggle');
 
-  const tierValues = {
-    1: { primary: 16, secondary: 12 },
-    2: { primary: 20, secondary: 15 },
-    3: { primary: 24, secondary: 18 },
-    4: { primary: 30, secondary: 25 },
-    5: { primary: 32, secondary: 27 } // Slightly higher than T4 based on "80+" estimate
-  };
+  // Calculate stats from build with tier-based values and masterwork bonuses
+  function calculateStatsFromBuild() {
+    const stats = {};
+    STATS.forEach(s => stats[s] = 0);
 
-  buildSlots.forEach(({ tier, archetype }) => {
-    const { primary, secondary } = tierValues[tier];
+    buildSlots.forEach(({ tier, archetype }) => {
+      const primaryStat = ARCHETYPE_STATS[archetype].primary;
+      const secondaryStat = ARCHETYPE_STATS[archetype].secondary;
 
-    switch (archetype) {
-      case 'Paragon':
-        stats.Super += primary;
-        stats.Melee += secondary;
-        break;
-      case 'Gunner':
-        stats.Weapon += primary;
-        stats.Grenade += secondary;
-        break;
-      case 'Brawler':
-        stats.Melee += primary;
-        stats.Health += secondary;
-        break;
-      case 'Bulwark':
-        stats.Health += primary;
-        stats.Class += secondary;
-        break;
-      case 'Grenadier':
-        stats.Grenade += primary;
-        stats.Super += secondary;
-        break;
-      case 'Specialist':
-        stats.Class += primary;
-        stats.Weapon += secondary;
-        break;
-    }
-  });
+      // Primary stat amount
+      stats[primaryStat] += TIER_STATS[tier].primary;
+      // Secondary stat amount
+      stats[secondaryStat] += TIER_STATS[tier].secondary;
 
-  return stats;
-}
+      // Add tertiary pool equally distributed among other stats (excluding primary & secondary)
+      const tertiaryStats = STATS.filter(s => s !== primaryStat && s !== secondaryStat);
+      const tertiaryPerStat = TIER_STATS[tier].tertiary / tertiaryStats.length;
+      tertiaryStats.forEach(s => {
+        stats[s] += tertiaryPerStat;
+      });
+
+      // Masterwork bonus adds +5 to all stats NOT primary or secondary when toggled on
+      if (masterworkToggle.checked) {
+        tertiaryStats.forEach(s => {
+          stats[s] += 5;
+        });
+      }
+    });
+
+    // Round stats to integers for display
+    STATS.forEach(stat => {
+      stats[stat] = Math.round(stats[stat]);
+    });
+
+    return stats;
+  }
 
   function updateTotalStats() {
     const totals = calculateStatsFromBuild();
@@ -269,6 +276,16 @@ function calculateStatsFromBuild() {
   // Initialize total stats display
   updateTotalStats();
 
+  // Suggest build button (placeholder)
+  document.getElementById('calcSuggested').addEventListener('click', () => {
+    document.getElementById('suggestedBuildOutput').textContent =
+      'Suggested build: 2x T5 Paragon, 2x T4 Gunner, 1x T3 Brawler (Example output)';
+  });
+
+  // Update totals on masterwork toggle change
+  masterworkToggle.addEventListener('change', () => {
+    updateTotalStats();
+  });
 </script>
 
 </body>
