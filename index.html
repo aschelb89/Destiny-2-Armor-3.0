@@ -12,6 +12,19 @@
   button { margin-top: 15px; padding: 10px 15px; font-size: 16px; cursor: pointer; }
   .flex-row { display: flex; flex-wrap: wrap; gap: 10px; }
   .flex-col { flex: 1 1 120px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+  }
+  th {
+    background: #e0f0ff;
+  }
 </style>
 </head>
 <body>
@@ -19,6 +32,62 @@
 <div class="section">
   <h1>Destiny 2 Armor 3.0 Stat Calculator</h1>
   <p>Calculate your optimal armor builds by selecting your class, desired stats, and customizing armor tiers and archetypes.</p>
+</div>
+
+<!-- New Armor Archetype Breakdown Section -->
+<div class="section">
+  <h2>🛡️ Armor Archetype Breakdown</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Archetype</th>
+        <th>Primary Stat Focus</th>
+        <th>Secondary Stat Focus</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paragon</strong></td>
+        <td>Super (Intellect)</td>
+        <td>Melee (Strength)</td>
+        <td>Boosts Super and Melee regeneration stats, ideal for builds centered on powerful Super abilities and close-range combat.</td>
+      </tr>
+      <tr>
+        <td><strong>Gunner</strong></td>
+        <td>Weapons (Discipline)</td>
+        <td>Grenade (Discipline)</td>
+        <td>Focuses on weapon handling and grenade regeneration. Perfect for aggressive weapon and grenade spammers.</td>
+      </tr>
+      <tr>
+        <td><strong>Brawler</strong></td>
+        <td>Melee (Strength)</td>
+        <td>Health (Resilience)</td>
+        <td>Strengthens Melee attacks and overall health. Great for tanky melee-focused builds.</td>
+      </tr>
+      <tr>
+        <td><strong>Bulwark</strong></td>
+        <td>Health (Resilience)</td>
+        <td>Class Ability (Recovery)</td>
+        <td>Increases durability and class ability recharge, suited for defensive and support roles.</td>
+      </tr>
+      <tr>
+        <td><strong>Grenadier</strong></td>
+        <td>Grenade (Discipline)</td>
+        <td>Super (Intellect)</td>
+        <td>Prioritizes grenade and Super energy, enabling frequent use of both grenades and Supers.</td>
+      </tr>
+      <tr>
+        <td><strong>Specialist</strong></td>
+        <td>Class Ability (Recovery)</td>
+        <td>Weapons (Discipline)</td>
+        <td>Enhances class ability recharge and weapon handling. Ideal for builds that rely heavily on class skills and weapons.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 10px; font-style: italic;">
+    ⚠️ <em>Note:</em> The actual stat gains vary by armor tier and Masterwork bonuses, so combining archetypes strategically can help you hit your desired stats efficiently.
+  </p>
 </div>
 
 <div class="section" id="statCalcSection">
