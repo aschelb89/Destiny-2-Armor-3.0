@@ -6,7 +6,7 @@
 <title>Destiny 2 Armor 3.0 Calculator</title>
 <style>
   body { font-family: Arial, sans-serif; background: #d0e7f9; margin: 20px; }
-  .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+  .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 0 8px rgba(0,0,0,0.1);}
   label { display: block; margin-top: 10px; }
   input[type=number], select { padding: 6px; font-size: 16px; width: 100%; max-width: 200px; }
   button { margin-top: 15px; padding: 10px 15px; font-size: 16px; cursor: pointer; }
@@ -25,11 +25,9 @@
   th {
     background: #e0f0ff;
   }
-  .masterwork-toggle {
-    margin-top: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  .inline-label {
+    margin-left: 5px;
+    font-weight: normal;
   }
 </style>
 </head>
@@ -40,6 +38,7 @@
   <p>Calculate your optimal armor builds by selecting your class, desired stats, and customizing armor tiers and archetypes.</p>
 </div>
 
+<!-- Armor Archetype Breakdown Section -->
 <div class="section">
   <h2>🛡️ Armor Archetype Breakdown</h2>
   <table>
@@ -73,7 +72,7 @@
       <tr>
         <td><strong>Bulwark</strong></td>
         <td>Health</td>
-        <td>Class Ability</td>
+        <td>Class</td>
         <td>Increases durability and class ability recharge, suited for defensive and support roles.</td>
       </tr>
       <tr>
@@ -84,26 +83,32 @@
       </tr>
       <tr>
         <td><strong>Specialist</strong></td>
-        <td>Class Ability</td>
+        <td>Class</td>
         <td>Weapons</td>
         <td>Enhances class ability recharge and weapon handling. Ideal for builds that rely heavily on class skills and weapons.</td>
       </tr>
     </tbody>
   </table>
   <p style="margin-top: 10px; font-style: italic;">
-    ⚠️ <em>Note:</em> Stat gains vary by armor tier and Masterwork bonuses. Combining archetypes strategically helps reach desired stats efficiently.
+    ⚠️ <em>Note:</em> Actual stat gains vary by armor tier and Masterwork bonuses, so combining archetypes strategically can help you hit your desired stats efficiently.
   </p>
 </div>
 
 <div class="section" id="statCalcSection">
-  <h2>Stat Calculator (Desired Stats Input) COMING SOON!</h2>
+  <h2>Stat Calculator (Desired Stats Input)</h2>
   <div class="flex-row" id="statInputs"></div>
-  <div class="masterwork-toggle">
-    <label for="masterworkToggle">Include Masterwork Bonuses (+5 to non-primary/secondary stats per piece)</label>
-    <input type="checkbox" id="masterworkToggle" checked />
-  </div>
   <button id="calcSuggested">Calculate Suggested Build</button>
-  <p id="suggestedBuildOutput" style="margin-top:10px; font-weight:bold;"></p>
+  <p id="suggestedBuildOutput"></p>
+</div>
+
+<div class="section" id="tertiaryModeSection">
+  <h3>Tertiary Stat Selection Mode</h3>
+  <label><input type="radio" name="tertiaryMode" value="global" checked /> Use Global Tertiary Stat</label>
+  <label><input type="radio" name="tertiaryMode" value="perPiece" /> Set Tertiary Stat Per Armor Piece</label>
+  <div id="globalTertiarySelector" style="margin-top:10px;">
+    <label for="globalTertiary">Select Global Tertiary Stat:</label>
+    <select id="globalTertiary"></select>
+  </div>
 </div>
 
 <div class="section" id="customBuilderSection">
@@ -117,26 +122,21 @@
 
   <div id="armorSlots"></div>
 
+  <label style="display:block; margin-top:15px;">
+    <input type="checkbox" id="masterworkToggle" checked /> Include Masterwork Bonus (+5 to 3 non-primary/secondary/tertiary stats)
+  </label>
+
   <h3>Estimated Total Stats:</h3>
   <ul id="totalStats"></ul>
 </div>
 
 <script>
-  const TIERS = [1, 2, 3, 4, 5];
-  const ARCHETYPES = ['Paragon', 'Gunner', 'Brawler', 'Bulwark', 'Grenadier', 'Specialist'];
-  const CLASSES = ['Hunter', 'Titan', 'Warlock'];
+  const TIERS = [1,2,3,4,5];
+  const ARCHETYPES = ['Paragon','Gunner','Brawler','Bulwark','Grenadier','Specialist'];
+  const CLASSES = ['Hunter','Titan','Warlock'];
   const STATS = ['Weapon', 'Health', 'Class', 'Grenade', 'Super', 'Melee'];
 
-  // Tier stat distribution based on guide averages (primary, secondary, tertiary pools)
-  const TIER_STATS = {
-    1: { primary: 16, secondary: 12, tertiary: 6 }, // avg tertiary ~5-8
-    2: { primary: 20, secondary: 15, tertiary: 10 },
-    3: { primary: 24, secondary: 18, tertiary: 13 },
-    4: { primary: 30, secondary: 25, tertiary: 17 },
-    5: { primary: 32, secondary: 26, tertiary: 20 }
-  };
-
-  // Map archetype to primary and secondary stats for calculation
+  // Archetype stat focus map
   const ARCHETYPE_STATS = {
     'Paragon': { primary: 'Super', secondary: 'Melee' },
     'Gunner': { primary: 'Weapon', secondary: 'Grenade' },
@@ -146,9 +146,23 @@
     'Specialist': { primary: 'Class', secondary: 'Weapon' }
   };
 
-  // Create stat inputs for calculator
-  const statInputsContainer = document.getElementById('statInputs');
+  // Tier stats based on the provided guide (approximate)
+  const TIER_STATS = {
+    1: { primary: 16, secondary: 12, tertiary: 7 },
+    2: { primary: 20, secondary: 15, tertiary: 10 },
+    3: { primary: 24, secondary: 18, tertiary: 13 },
+    4: { primary: 30, secondary: 25, tertiary: 18 },
+    5: { primary: 32, secondary: 28, tertiary: 21 }
+  };
+
+  // Build state
+  let buildSlots = [];
   let desiredStats = {};
+  let tertiaryMode = 'global';
+  let selectedGlobalTertiaryStat = 'Health';
+
+  // Create stat inputs for desired stats calculator
+  const statInputsContainer = document.getElementById('statInputs');
   STATS.forEach(stat => {
     desiredStats[stat] = 0;
     const div = document.createElement('div');
@@ -157,104 +171,176 @@
     statInputsContainer.appendChild(div);
   });
 
-  // Update desired stats on input
   STATS.forEach(stat => {
     document.getElementById(`stat_${stat}`).addEventListener('input', e => {
       let val = parseInt(e.target.value);
-      if (isNaN(val) || val < 0) val = 0;
-      else if (val > 200) val = 200;
+      if(isNaN(val) || val < 0) val = 0;
+      else if(val > 200) val = 200;
       desiredStats[stat] = val;
     });
   });
 
-  // Build slots for custom builder
-  const armorSlotsDiv = document.getElementById('armorSlots');
-  const slotNames = ['Helmet', 'Gauntlets', 'Chest', 'Legs', 'Class Item'];
-  let buildSlots = [];
+  // Global tertiary selector options
+  const globalTertiarySelector = document.getElementById('globalTertiary');
+  STATS.forEach(stat => {
+    const option = document.createElement('option');
+    option.value = stat;
+    option.textContent = stat;
+    globalTertiarySelector.appendChild(option);
+  });
+  globalTertiarySelector.value = selectedGlobalTertiaryStat;
+  globalTertiarySelector.addEventListener('change', () => {
+    selectedGlobalTertiaryStat = globalTertiarySelector.value;
+    updateTotalStats();
+  });
 
-  function createBuildSlot(i) {
-    const div = document.createElement('div');
-    div.style.marginBottom = '12px';
-    div.style.display = 'flex';
-    div.style.gap = '10px';
-    div.style.alignItems = 'center';
-
-    const label = document.createElement('div');
-    label.style.width = '100px';
-    label.textContent = slotNames[i];
-    div.appendChild(label);
-
-    const tierSelect = document.createElement('select');
-    TIERS.forEach(t => {
-      const opt = document.createElement('option');
-      opt.value = t;
-      opt.textContent = 'Tier ' + t;
-      tierSelect.appendChild(opt);
-    });
-    div.appendChild(tierSelect);
-
-    const archetypeSelect = document.createElement('select');
-    ARCHETYPES.forEach(a => {
-      const opt = document.createElement('option');
-      opt.value = a;
-      opt.textContent = a;
-      archetypeSelect.appendChild(opt);
-    });
-    div.appendChild(archetypeSelect);
-
-    buildSlots[i] = { tier: 5, archetype: ARCHETYPES[0] };
-    tierSelect.value = 5;
-    archetypeSelect.value = ARCHETYPES[0];
-
-    tierSelect.addEventListener('change', () => {
-      buildSlots[i].tier = Number(tierSelect.value);
+  // Handle tertiary mode radio buttons
+  const tertiaryModeRadios = document.querySelectorAll('input[name="tertiaryMode"]');
+  tertiaryModeRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      tertiaryMode = document.querySelector('input[name="tertiaryMode"]:checked').value;
+      renderArmorSlots(); // re-render to show/hide tertiary selector per piece
       updateTotalStats();
+      document.getElementById('globalTertiarySelector').style.display = (tertiaryMode === 'global') ? 'block' : 'none';
     });
-    archetypeSelect.addEventListener('change', () => {
-      buildSlots[i].archetype = archetypeSelect.value;
-      updateTotalStats();
-    });
-
-    return div;
-  }
-
-  for (let i = 0; i < 5; i++) {
-    armorSlotsDiv.appendChild(createBuildSlot(i));
-  }
+  });
 
   // Masterwork toggle
   const masterworkToggle = document.getElementById('masterworkToggle');
+  masterworkToggle.addEventListener('change', () => {
+    updateTotalStats();
+  });
 
-  // Calculate stats from build with tier-based values and masterwork bonuses
+  // Calculate suggested build button (placeholder logic)
+  document.getElementById('calcSuggested').addEventListener('click', () => {
+    document.getElementById('suggestedBuildOutput').textContent =
+      'Suggested build: 2x T5 Paragon, 2x T4 Gunner, 1x T3 Brawler';
+  });
+
+  // Armor slots container
+  const armorSlotsDiv = document.getElementById('armorSlots');
+  const slotNames = ['Helmet', 'Gauntlets', 'Chest', 'Legs', 'Class Item'];
+
+  // Initialize build slots
+  function initBuildSlots() {
+    buildSlots = [];
+    for(let i=0; i<5; i++) {
+      buildSlots.push({
+        tier: 5,
+        archetype: ARCHETYPES[0],
+        tertiaryStat: STATS[0]  // default tertiary stat per piece
+      });
+    }
+  }
+
+  // Render armor slots UI
+  function renderArmorSlots() {
+    armorSlotsDiv.innerHTML = '';
+    buildSlots.forEach((slot, i) => {
+      const div = document.createElement('div');
+      div.style.marginBottom = '12px';
+      div.style.display = 'flex';
+      div.style.gap = '10px';
+      div.style.alignItems = 'center';
+
+      const label = document.createElement('div');
+      label.style.width = '100px';
+      label.textContent = slotNames[i];
+      div.appendChild(label);
+
+      // Tier select
+      const tierSelect = document.createElement('select');
+      TIERS.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = 'Tier ' + t;
+        tierSelect.appendChild(opt);
+      });
+      tierSelect.value = slot.tier;
+      div.appendChild(tierSelect);
+
+      // Archetype select
+      const archetypeSelect = document.createElement('select');
+      ARCHETYPES.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a;
+        opt.textContent = a;
+        archetypeSelect.appendChild(opt);
+      });
+      archetypeSelect.value = slot.archetype;
+      div.appendChild(archetypeSelect);
+
+      // Tertiary stat select (only visible if per-piece mode)
+      const tertiarySelect = document.createElement('select');
+      STATS.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        tertiarySelect.appendChild(opt);
+      });
+      tertiarySelect.value = slot.tertiaryStat;
+      tertiarySelect.style.display = (tertiaryMode === 'perPiece') ? 'inline-block' : 'none';
+      div.appendChild(tertiarySelect);
+
+      tierSelect.addEventListener('change', () => {
+        buildSlots[i].tier = Number(tierSelect.value);
+        updateTotalStats();
+      });
+      archetypeSelect.addEventListener('change', () => {
+        buildSlots[i].archetype = archetypeSelect.value;
+        updateTotalStats();
+      });
+      tertiarySelect.addEventListener('change', () => {
+        buildSlots[i].tertiaryStat = tertiarySelect.value;
+        updateTotalStats();
+      });
+
+      armorSlotsDiv.appendChild(div);
+    });
+  }
+
+  // Calculation function updated for Masterwork and tertiary mode
   function calculateStatsFromBuild() {
     const stats = {};
     STATS.forEach(s => stats[s] = 0);
 
-    buildSlots.forEach(({ tier, archetype }) => {
+    buildSlots.forEach(({ tier, archetype, tertiaryStat }) => {
       const primaryStat = ARCHETYPE_STATS[archetype].primary;
       const secondaryStat = ARCHETYPE_STATS[archetype].secondary;
 
-      // Primary stat amount
       stats[primaryStat] += TIER_STATS[tier].primary;
-      // Secondary stat amount
       stats[secondaryStat] += TIER_STATS[tier].secondary;
 
-      // Add tertiary pool equally distributed among other stats (excluding primary & secondary)
-      const tertiaryStats = STATS.filter(s => s !== primaryStat && s !== secondaryStat);
-      const tertiaryPerStat = TIER_STATS[tier].tertiary / tertiaryStats.length;
-      tertiaryStats.forEach(s => {
-        stats[s] += tertiaryPerStat;
-      });
+      let tertiaryToUse = null;
+      if (tertiaryMode === 'global') {
+        tertiaryToUse = selectedGlobalTertiaryStat;
+      } else {
+        tertiaryToUse = tertiaryStat;
+      }
 
-      // Masterwork bonus adds +5 to all stats NOT primary or secondary when toggled on
-      if (masterworkToggle.checked) {
+      if (tertiaryToUse !== primaryStat && tertiaryToUse !== secondaryStat) {
+        stats[tertiaryToUse] += TIER_STATS[tier].tertiary;
+      } else {
+        // fallback: distribute tertiary evenly across other stats excluding primary and secondary
+        const tertiaryStats = STATS.filter(s => s !== primaryStat && s !== secondaryStat);
+        const tertiaryPerStat = TIER_STATS[tier].tertiary / tertiaryStats.length;
         tertiaryStats.forEach(s => {
-          stats[s] += 5;
+          stats[s] += tertiaryPerStat;
+        });
+      }
+
+      // Masterwork bonus: +5 to the 3 stats NOT primary, secondary, or tertiary
+      if (masterworkToggle.checked) {
+        const excludedStats = [primaryStat, secondaryStat, tertiaryToUse];
+        STATS.forEach(s => {
+          if (!excludedStats.includes(s)) {
+            stats[s] += 5;
+          }
         });
       }
     });
 
-    // Round stats to integers for display
+    // Round all stats
     STATS.forEach(stat => {
       stats[stat] = Math.round(stats[stat]);
     });
@@ -262,6 +348,7 @@
     return stats;
   }
 
+  // Update stats display
   function updateTotalStats() {
     const totals = calculateStatsFromBuild();
     const ul = document.getElementById('totalStats');
@@ -273,19 +360,12 @@
     });
   }
 
-  // Initialize total stats display
+  // Initialization
+  initBuildSlots();
+  renderArmorSlots();
   updateTotalStats();
+  document.getElementById('globalTertiarySelector').style.display = 'block';
 
-  // Suggest build button (placeholder)
-  document.getElementById('calcSuggested').addEventListener('click', () => {
-    document.getElementById('suggestedBuildOutput').textContent =
-      'Suggested build: 2x T5 Paragon, 2x T4 Gunner, 1x T3 Brawler (Example output)';
-  });
-
-  // Update totals on masterwork toggle change
-  masterworkToggle.addEventListener('change', () => {
-    updateTotalStats();
-  });
 </script>
 
 </body>
