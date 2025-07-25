@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Destiny 2 Armor 3.0 Calculator</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #d0e7f9; margin: 20px; }
+  .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 0 8px rgba(0,0,0,0.1);}
+  label { display: block; margin-top: 10px; }
+  input[type=number], select { padding: 6px; font-size: 16px; width: 100%; max-width: 200px; }
+  button { margin-top: 15px; padding: 10px 15px; font-size: 16px; cursor: pointer; }
+  .flex-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .flex-col { flex: 1 1 120px; }
+</style>
+</head>
+<body>
+
+<div class="section">
+  <h1>Destiny 2 Armor 3.0 Stat Calculator</h1>
+  <p>Calculate your optimal armor builds by selecting your class, desired stats, and customizing armor tiers and archetypes.</p>
+</div>
+
+<div class="section" id="statCalcSection">
+  <h2>Stat Calculator (Desired Stats Input)</h2>
+  <div class="flex-row" id="statInputs"></div>
+  <button id="calcSuggested">Calculate Suggested Build</button>
+  <p id="suggestedBuildOutput"></p>
+</div>
+
+<div class="section" id="customBuilderSection">
+  <h2>Custom Tier/Archetype Builder</h2>
+  <label for="classSelect">Class:</label>
+  <select id="classSelect">
+    <option>Hunter</option>
+    <option>Titan</option>
+    <option>Warlock</option>
+  </select>
+
+  <div id="armorSlots"></div>
+
+  <h3>Estimated Total Stats:</h3>
+  <ul id="totalStats"></ul>
+</div>
+
+<script>
+  const TIERS = [1,2,3,4,5];
+  const ARCHETYPES = ['Paragon','Gunner','Brawler','Bulwark','Grenadier','Specialist'];
+  const CLASSES = ['Hunter','Titan','Warlock'];
+  const STATS = ['Mobility', 'Resilience', 'Recovery', 'Discipline', 'Intellect', 'Strength'];
+
+  // Create stat inputs for calculator
+  const statInputsContainer = document.getElementById('statInputs');
+  let desiredStats = {};
+  STATS.forEach(stat => {
+    desiredStats[stat] = 0;
+    const div = document.createElement('div');
+    div.className = 'flex-col';
+    div.innerHTML = `<label>${stat} (0–200)</label><input type="number" min="0" max="200" value="0" id="stat_${stat}" />`;
+    statInputsContainer.appendChild(div);
+  });
+
+  // Update desired stats on input
+  STATS.forEach(stat => {
+    document.getElementById(`stat_${stat}`).addEventListener('input', e => {
+      let val = parseInt(e.target.value);
+      if(isNaN(val) || val < 0) val = 0;
+      else if(val > 200) val = 200;
+      desiredStats[stat] = val;
+    });
+  });
+
+  // Calculate suggested build (dummy logic for demo)
+  document.getElementById('calcSuggested').addEventListener('click', () => {
+    // TODO: Replace with real matching algorithm
+    document.getElementById('suggestedBuildOutput').textContent =
+      'Suggested build: 2x T5 Paragon, 2x T4 Gunner, 1x T3 Brawler';
+  });
+
+  // Build slots for custom builder
+  const armorSlotsDiv = document.getElementById('armorSlots');
+  const slotNames = ['Helmet', 'Gauntlets', 'Chest', 'Legs', 'Class Item'];
+  let buildSlots = [];
+
+  function createBuildSlot(i) {
+    const div = document.createElement('div');
+    div.style.marginBottom = '12px';
+    div.style.display = 'flex';
+    div.style.gap = '10px';
+    div.style.alignItems = 'center';
+
+    const label = document.createElement('div');
+    label.style.width = '100px';
+    label.textContent = slotNames[i];
+    div.appendChild(label);
+
+    const tierSelect = document.createElement('select');
+    TIERS.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = 'Tier ' + t;
+      tierSelect.appendChild(opt);
+    });
+    div.appendChild(tierSelect);
+
+    const archetypeSelect = document.createElement('select');
+    ARCHETYPES.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a;
+      opt.textContent = a;
+      archetypeSelect.appendChild(opt);
+    });
+    div.appendChild(archetypeSelect);
+
+    // Initialize build slot object
+    buildSlots[i] = {tier: 5, archetype: ARCHETYPES[0]};
+    tierSelect.value = 5;
+    archetypeSelect.value = ARCHETYPES[0];
+
+    tierSelect.addEventListener('change', () => {
+      buildSlots[i].tier = Number(tierSelect.value);
+      updateTotalStats();
+    });
+    archetypeSelect.addEventListener('change', () => {
+      buildSlots[i].archetype = archetypeSelect.value;
+      updateTotalStats();
+    });
+
+    return div;
+  }
+
+  for(let i=0; i<5; i++) {
+    armorSlotsDiv.appendChild(createBuildSlot(i));
+  }
+
+  // Calculate stats from build - same mock logic as React version
+  function calculateStatsFromBuild() {
+    const stats = {};
+    STATS.forEach(s => stats[s] = 0);
+    buildSlots.forEach(({tier, archetype}) => {
+      if (archetype === 'Paragon') {
+        stats.Intellect += tier * 6;
+        stats.Strength += tier * 5;
+      } else if (archetype === 'Gunner') {
+        stats.Discipline += tier * 6;
+        stats.Mobility += tier * 4;
+      } else if (archetype === 'Brawler') {
+        stats.Strength += tier * 7;
+        stats.Resilience += tier * 5;
+      } else if (archetype === 'Bulwark') {
+        stats.Resilience += tier * 7;
+        stats.Recovery += tier * 5;
+      } else if (archetype === 'Grenadier') {
+        stats.Discipline += tier * 7;
+        stats.Intellect += tier * 5;
+      } else if (archetype === 'Specialist') {
+        stats.Recovery += tier * 7;
+        stats.Mobility += tier * 5;
+      }
+    });
+    return stats;
+  }
+
+  function updateTotalStats() {
+    const totals = calculateStatsFromBuild();
+    const ul = document.getElementById('totalStats');
+    ul.innerHTML = '';
+    STATS.forEach(stat => {
+      const li = document.createElement('li');
+      li.textContent = `${stat}: ${totals[stat]}`;
+      ul.appendChild(li);
+    });
+  }
+
+  // Initialize total stats display
+  updateTotalStats();
+
+</script>
+
+</body>
+</html>
