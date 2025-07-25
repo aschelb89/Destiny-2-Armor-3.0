@@ -5,42 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Destiny 2 Armor 3.0 Calculator</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #d0e7f9;
-    margin: 20px;
-  }
-  .section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
-  }
-  label {
-    display: block;
-    margin-top: 10px;
-  }
-  input[type=number], select {
-    padding: 6px;
-    font-size: 16px;
-    width: 100%;
-    max-width: 200px;
-  }
-  button {
-    margin-top: 15px;
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  .flex-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .flex-col {
-    flex: 1 1 120px;
-  }
+  body { font-family: Arial, sans-serif; background: #d0e7f9; margin: 20px; }
+  .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 0 8px rgba(0,0,0,0.1);}
+  label { display: block; margin-top: 10px; }
+  input[type=number], select { padding: 6px; font-size: 16px; width: 100%; max-width: 200px; box-sizing: border-box; }
+  button { margin-top: 15px; padding: 10px 15px; font-size: 16px; cursor: pointer; }
+  .flex-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .flex-col { flex: 1 1 120px; }
   table {
     width: 100%;
     border-collapse: collapse;
@@ -58,17 +29,34 @@
     margin-left: 5px;
     font-weight: normal;
   }
+
+  /* New grid layout for armor slots */
+  #armorSlots {
+    display: grid;
+    grid-template-columns: 120px repeat(3, 1fr) 1fr; /* Slot + Tier + Archetype + Tertiary */
+    gap: 10px 15px;
+    align-items: center;
+    margin-top: 10px;
+  }
+  #armorSlots > div {
+    /* Each grid cell */
+  }
+  #armorSlots select {
+    width: 100%;
+    padding: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
 </style>
 </head>
 <body>
 
-<!-- Header / Intro -->
 <div class="section">
   <h1>Destiny 2 Armor 3.0 Stat Calculator</h1>
   <p>Calculate your optimal armor builds by selecting your class, desired stats, and customizing armor tiers and archetypes.</p>
 </div>
 
-<!-- Armor Archetype Breakdown -->
+<!-- Armor Archetype Breakdown Section -->
 <div class="section">
   <h2>🛡️ Armor Archetype Breakdown</h2>
   <table>
@@ -89,7 +77,7 @@
       </tr>
       <tr>
         <td><strong>Gunner</strong></td>
-        <td>Weapons</td>
+        <td>Weapon</td>
         <td>Grenade</td>
         <td>Focuses on weapon handling and grenade regeneration. Perfect for aggressive weapon and grenade spammers.</td>
       </tr>
@@ -114,7 +102,7 @@
       <tr>
         <td><strong>Specialist</strong></td>
         <td>Class</td>
-        <td>Weapons</td>
+        <td>Weapon</td>
         <td>Enhances class ability recharge and weapon handling. Ideal for builds that rely heavily on class skills and weapons.</td>
       </tr>
     </tbody>
@@ -124,7 +112,6 @@
   </p>
 </div>
 
-<!-- Build Options & Suggestions -->
 <div class="section" id="options-and-suggestions-section">
   <h2>Build Options & Suggestions</h2>
 
@@ -137,12 +124,12 @@
 
   <label for="tertiary-stat" style="margin-left: 20px;">Tertiary Stat:</label>
   <select id="tertiary-stat">
-    <option value="Weapon">Weapons</option>
+    <option value="Weapon">Weapon</option>
+    <option value="Health">Health</option>
     <option value="Class">Class</option>
+    <option value="Grenade">Grenade</option>
     <option value="Super">Super</option>
     <option value="Melee">Melee</option>
-    <option value="Grenade">Grenade</option>
-    <option value="Health">Health</option>
   </select>
 
   <br /><br />
@@ -159,7 +146,6 @@
   </div>
 </div>
 
-<!-- Tertiary Stat Selection Mode -->
 <div class="section" id="tertiaryModeSection">
   <h3>Tertiary Stat Selection Mode</h3>
   <label><input type="radio" name="tertiaryMode" value="global" checked /> Use Global Tertiary Stat</label>
@@ -170,10 +156,8 @@
   </div>
 </div>
 
-<!-- Custom Tier/Archetype Builder -->
 <div class="section" id="customBuilderSection">
   <h2>Custom Tier/Archetype Builder</h2>
-
   <label for="classSelect">Class:</label>
   <select id="classSelect">
     <option>Hunter</option>
@@ -184,8 +168,7 @@
   <div id="armorSlots"></div>
 
   <label style="display:block; margin-top:15px;">
-    <input type="checkbox" id="masterworkToggle" checked />
-    Include Masterwork Bonus (+5 to 3 non-primary/secondary/tertiary stats)
+    <input type="checkbox" id="masterworkToggle" checked /> Include Masterwork Bonus (+5 to 3 non-primary/secondary/tertiary stats)
   </label>
 
   <h3>Estimated Total Stats:</h3>
@@ -193,13 +176,12 @@
 </div>
 
 <script>
-  // Constants
-  const TIERS = [1, 2, 3, 4, 5];
-  const ARCHETYPES = ['Paragon', 'Gunner', 'Brawler', 'Bulwark', 'Grenadier', 'Specialist'];
-  const CLASSES = ['Hunter', 'Titan', 'Warlock'];
+  const TIERS = [1,2,3,4,5];
+  const ARCHETYPES = ['Paragon','Gunner','Brawler','Bulwark','Grenadier','Specialist'];
+  const CLASSES = ['Hunter','Titan','Warlock'];
   const STATS = ['Weapon', 'Health', 'Class', 'Grenade', 'Super', 'Melee'];
 
-  // Archetype primary/secondary stat mapping
+  // Archetype stat focus map
   const ARCHETYPE_STATS = {
     'Paragon': { primary: 'Super', secondary: 'Melee' },
     'Gunner': { primary: 'Weapon', secondary: 'Grenade' },
@@ -209,7 +191,7 @@
     'Specialist': { primary: 'Class', secondary: 'Weapon' }
   };
 
-  // Tier stats based on guide (approximate)
+  // Tier stats based on the provided guide (approximate)
   const TIER_STATS = {
     1: { primary: 16, secondary: 12, tertiary: 7 },
     2: { primary: 20, secondary: 15, tertiary: 10 },
@@ -218,16 +200,15 @@
     5: { primary: 32, secondary: 28, tertiary: 21 }
   };
 
-  // State variables
+  // Build state
   let buildSlots = [];
-  let desiredStats = {};
   let tertiaryMode = 'global';
   let selectedGlobalTertiaryStat = 'Health';
 
-  // Initialize build slots
+  // Initialize build slots with defaults
   function initBuildSlots() {
     buildSlots = [];
-    for (let i = 0; i < 5; i++) {
+    for(let i=0; i<5; i++) {
       buildSlots.push({
         tier: 5,
         archetype: ARCHETYPES[0],
@@ -236,26 +217,30 @@
     }
   }
 
-  // Render armor slots UI
+  // Render armor slots UI as grid
   function renderArmorSlots() {
     const armorSlotsDiv = document.getElementById('armorSlots');
     armorSlotsDiv.innerHTML = '';
 
     const slotNames = ['Helmet', 'Gauntlets', 'Chest', 'Legs', 'Class Item'];
 
+    // Add header row
+    const headers = ['Slot', 'Tier', 'Archetype', 'Tertiary Stat'];
+    headers.forEach(text => {
+      const headerCell = document.createElement('div');
+      headerCell.style.fontWeight = 'bold';
+      headerCell.style.paddingBottom = '6px';
+      headerCell.textContent = text;
+      armorSlotsDiv.appendChild(headerCell);
+    });
+
     buildSlots.forEach((slot, i) => {
-      const div = document.createElement('div');
-      div.style.marginBottom = '12px';
-      div.style.display = 'flex';
-      div.style.gap = '10px';
-      div.style.alignItems = 'center';
+      // Slot label
+      const labelCell = document.createElement('div');
+      labelCell.textContent = slotNames[i];
+      armorSlotsDiv.appendChild(labelCell);
 
-      const label = document.createElement('div');
-      label.style.width = '100px';
-      label.textContent = slotNames[i];
-      div.appendChild(label);
-
-      // Tier selector
+      // Tier select
       const tierSelect = document.createElement('select');
       TIERS.forEach(t => {
         const opt = document.createElement('option');
@@ -264,9 +249,13 @@
         tierSelect.appendChild(opt);
       });
       tierSelect.value = slot.tier;
-      div.appendChild(tierSelect);
+      tierSelect.addEventListener('change', () => {
+        buildSlots[i].tier = Number(tierSelect.value);
+        updateTotalStats();
+      });
+      armorSlotsDiv.appendChild(tierSelect);
 
-      // Archetype selector
+      // Archetype select
       const archetypeSelect = document.createElement('select');
       ARCHETYPES.forEach(a => {
         const opt = document.createElement('option');
@@ -275,9 +264,13 @@
         archetypeSelect.appendChild(opt);
       });
       archetypeSelect.value = slot.archetype;
-      div.appendChild(archetypeSelect);
+      archetypeSelect.addEventListener('change', () => {
+        buildSlots[i].archetype = archetypeSelect.value;
+        updateTotalStats();
+      });
+      armorSlotsDiv.appendChild(archetypeSelect);
 
-      // Tertiary stat selector (visible only if per-piece mode)
+      // Tertiary select (show/hide based on mode)
       const tertiarySelect = document.createElement('select');
       STATS.forEach(s => {
         const opt = document.createElement('option');
@@ -287,32 +280,18 @@
       });
       tertiarySelect.value = slot.tertiaryStat;
       tertiarySelect.style.display = (tertiaryMode === 'perPiece') ? 'inline-block' : 'none';
-      div.appendChild(tertiarySelect);
-
-      // Event handlers
-      tierSelect.addEventListener('change', () => {
-        buildSlots[i].tier = Number(tierSelect.value);
-        updateTotalStats();
-      });
-      archetypeSelect.addEventListener('change', () => {
-        buildSlots[i].archetype = archetypeSelect.value;
-        updateTotalStats();
-      });
       tertiarySelect.addEventListener('change', () => {
         buildSlots[i].tertiaryStat = tertiarySelect.value;
         updateTotalStats();
       });
-
-      armorSlotsDiv.appendChild(div);
+      armorSlotsDiv.appendChild(tertiarySelect);
     });
   }
 
-  // Calculate total stats from build considering masterwork and tertiary mode
+  // Calculate stats from current buildSlots, taking into account masterwork and tertiary mode
   function calculateStatsFromBuild() {
     const stats = {};
     STATS.forEach(s => stats[s] = 0);
-
-    const masterworkOn = document.getElementById('masterworkToggle').checked;
 
     buildSlots.forEach(({ tier, archetype, tertiaryStat }) => {
       const primaryStat = ARCHETYPE_STATS[archetype].primary;
@@ -321,12 +300,17 @@
       stats[primaryStat] += TIER_STATS[tier].primary;
       stats[secondaryStat] += TIER_STATS[tier].secondary;
 
-      let tertiaryToUse = (tertiaryMode === 'global') ? selectedGlobalTertiaryStat : tertiaryStat;
+      let tertiaryToUse = null;
+      if (tertiaryMode === 'global') {
+        tertiaryToUse = selectedGlobalTertiaryStat;
+      } else {
+        tertiaryToUse = tertiaryStat;
+      }
 
       if (tertiaryToUse !== primaryStat && tertiaryToUse !== secondaryStat) {
         stats[tertiaryToUse] += TIER_STATS[tier].tertiary;
       } else {
-        // Distribute tertiary evenly to all non-primary/secondary stats
+        // fallback: distribute tertiary evenly across other stats excluding primary and secondary
         const tertiaryStats = STATS.filter(s => s !== primaryStat && s !== secondaryStat);
         const tertiaryPerStat = TIER_STATS[tier].tertiary / tertiaryStats.length;
         tertiaryStats.forEach(s => {
@@ -334,8 +318,8 @@
         });
       }
 
-      // Apply masterwork bonus: +5 to 3 stats NOT primary, secondary, or tertiary
-      if (masterworkOn) {
+      // Masterwork bonus: +5 to the 3 stats NOT primary, secondary, or tertiary
+      if (document.getElementById('masterworkToggle').checked) {
         const excludedStats = [primaryStat, secondaryStat, tertiaryToUse];
         STATS.forEach(s => {
           if (!excludedStats.includes(s)) {
@@ -345,7 +329,7 @@
       }
     });
 
-    // Round all stats to integers
+    // Round all stats
     STATS.forEach(stat => {
       stats[stat] = Math.round(stats[stat]);
     });
@@ -353,7 +337,7 @@
     return stats;
   }
 
-  // Update stats display in the UI
+  // Update total stats display in UI
   function updateTotalStats() {
     const totals = calculateStatsFromBuild();
     const ul = document.getElementById('totalStats');
@@ -365,44 +349,44 @@
     });
   }
 
-  // Initialize global tertiary selector options
-  function initGlobalTertiarySelector() {
-    const globalTertiarySelector = document.getElementById('globalTertiary');
-    globalTertiarySelector.innerHTML = '';
-    STATS.forEach(stat => {
-      const option = document.createElement('option');
-      option.value = stat;
-      option.textContent = stat;
-      globalTertiarySelector.appendChild(option);
-    });
-    globalTertiarySelector.value = selectedGlobalTertiaryStat;
-    globalTertiarySelector.addEventListener('change', () => {
-      selectedGlobalTertiaryStat = globalTertiarySelector.value;
-      updateTotalStats();
-    });
-  }
+  // Setup global tertiary selector options
+  const globalTertiarySelector = document.getElementById('globalTertiary');
+  STATS.forEach(stat => {
+    const option = document.createElement('option');
+    option.value = stat;
+    option.textContent = stat;
+    globalTertiarySelector.appendChild(option);
+  });
+  globalTertiarySelector.value = selectedGlobalTertiaryStat;
+  globalTertiarySelector.addEventListener('change', () => {
+    selectedGlobalTertiaryStat = globalTertiarySelector.value;
+    updateTotalStats();
+  });
 
   // Handle tertiary mode radio buttons
-  function setupTertiaryModeRadios() {
-    const radios = document.querySelectorAll('input[name="tertiaryMode"]');
-    radios.forEach(radio => {
-      radio.addEventListener('change', () => {
-        tertiaryMode = document.querySelector('input[name="tertiaryMode"]:checked').value;
-        document.getElementById('globalTertiarySelector').style.display = (tertiaryMode === 'global') ? 'block' : 'none';
-        renderArmorSlots();
-        updateTotalStats();
-      });
+  const tertiaryModeRadios = document.querySelectorAll('input[name="tertiaryMode"]');
+  tertiaryModeRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      tertiaryMode = document.querySelector('input[name="tertiaryMode"]:checked').value;
+      renderArmorSlots();
+      updateTotalStats();
+      document.getElementById('globalTertiarySelector').style.display = (tertiaryMode === 'global') ? 'block' : 'none';
     });
-  }
+  });
 
-  // Initialize everything on page load
-  window.onload = () => {
-    initBuildSlots();
-    initGlobalTertiarySelector();
-    setupTertiaryModeRadios();
-    renderArmorSlots();
-    updateTotalStats();
-  };
+  // Masterwork toggle event
+  document.getElementById('masterworkToggle').addEventListener('change', updateTotalStats);
+
+  // Initialization on page load
+  initBuildSlots();
+  renderArmorSlots();
+  updateTotalStats();
+  document.getElementById('globalTertiarySelector').style.display = 'block';
+
+  // Placeholder for your build suggestion engine function
+  function runBuildSuggestionEngine() {
+    alert('Build suggestion engine not implemented yet.');
+  }
 </script>
 
 </body>
