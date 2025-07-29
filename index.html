@@ -128,22 +128,32 @@
 <div class="section" id="options-and-suggestions-section">
   <h2>Build Options & Suggestions</h2>
 
-  <label for="build-class">Class:</label>
-  <select id="build-class">
-    <option value="Titan">Titan</option>
-    <option value="Hunter" selected>Hunter</option>
-    <option value="Warlock">Warlock</option>
-  </select>
-
-  <label for="tertiary-stat" style="margin-left: 20px;">Tertiary Stat:</label>
-  <select id="tertiary-stat">
-    <option value="Weapon">Weapons</option>
-    <option value="Class">Class</option>
-    <option value="Super">Super</option>
-    <option value="Melee">Melee</option>
-    <option value="Grenade">Grenade</option>
-    <option value="Health">Health</option>
-  </select>
+  <div class="flex-row">
+  <div class="flex-col">
+    <label for="desired-weapons">Weapons</label>
+    <input type="number" id="desired-weapons" min="0" max="200" />
+  </div>
+  <div class="flex-col">
+    <label for="desired-class">Class</label>
+    <input type="number" id="desired-class" min="0" max="200" />
+  </div>
+  <div class="flex-col">
+    <label for="desired-super">Super</label>
+    <input type="number" id="desired-super" min="0" max="200" />
+  </div>
+  <div class="flex-col">
+    <label for="desired-melee">Melee</label>
+    <input type="number" id="desired-melee" min="0" max="200" />
+  </div>
+  <div class="flex-col">
+    <label for="desired-grenade">Grenade</label>
+    <input type="number" id="desired-grenade" min="0" max="200" />
+  </div>
+  <div class="flex-col">
+    <label for="desired-health">Health</label>
+    <input type="number" id="desired-health" min="0" max="200" />
+  </div>
+</div>
 
   <br /><br />
   <label>
